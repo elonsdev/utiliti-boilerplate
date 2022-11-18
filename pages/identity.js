@@ -42,16 +42,20 @@ export default function Identity(props) {
                   <div className='flex flex-col '>
                     {username && (
                       <>
-                        <div className='mt-8 w-[900px] flex justify-between'>
-                          <h4 className='mb-6 text-4xl'>Hello, {username}.</h4>
-                          <p className='text-2xl mt-2'>{address}</p>
+                        <div className='mt-8 lg:w-[900px] flex justify-between'>
+                          <h4 className='mx-1 mb-6 text-sm lg:text-4xl'>
+                            Hello, {username}.
+                          </h4>
+                          <p className='mx-2 flex flex-wrap text-xs lg:text-2xl mt-2'>
+                            {address}
+                          </p>
                         </div>
-                        <div>
+                        <div className='mx-2'>
                           <p>You have 0 Testnet Utiliti tokens</p>
                         </div>
                       </>
                     )}
-                    <div className='mt-24 self-center'>
+                    <div className='mt-24 mb-16 self-center'>
                       <SignOutButton />
                     </div>
                   </div>

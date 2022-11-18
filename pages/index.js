@@ -17,9 +17,9 @@ export default function Home() {
           boilerplate
         </h1>
 
-        <p className={styles.description}>
-          Get started by forking this repo
-          <code className={styles.code}>
+        <p className='text-sm mt-8'>
+          Get started by forking this repo:
+          <code className='text-sm ml-2 bg-black py-1'>
             https://github.com/elonsdev/utiliti-boilerplate
           </code>
         </p>
