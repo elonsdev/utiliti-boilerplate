@@ -22,8 +22,8 @@ export default function Identity() {
               IDENTITY API
             </h1>
             <p className='text-zinc-400 text-sm mt-4 tracking-wide'>
-              Allow users to create a wallet easily and quickly with utlity.ai's
-              identity API...
+              Allow users to create a wallet easily and quickly with
+              utlity.ai&apos;s identity API...
             </p>
             <div className='mx-auto w-24 h-1 my-12 bg-gradient-to-r from-zinc-500 to-zinc-400 rounded-full'></div>
           </div>
