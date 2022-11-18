@@ -7,7 +7,7 @@ export default function Navbar() {
         <nav className='flex justify-between   '>
           <div className='grid place-items-center'>
             <div className='pt-8 '>
-              <div class='h-9 w-9 fill-white hover:fill-white cursor-pointer z-50 transition-all duration-300'>
+              <div className='h-9 w-9 fill-white hover:fill-white cursor-pointer z-50 transition-all duration-300'>
                 <svg viewBox='0 0 39 38' xmlns='http://www.w3.org/2000/svg'>
                   <defs>
                     <linearGradient
