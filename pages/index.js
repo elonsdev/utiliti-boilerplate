@@ -30,7 +30,7 @@ export default function Home() {
             <p>Find in-depth information about utiliti.ai features and API.</p>
           </a>
 
-          <a href='https://utiliti.ai/learn' className={styles.card}>
+          <a href='https://utiliti.ai/' className={styles.card}>
             <h2>Learn &rarr;</h2>
             <p>Learn about utiliti.ai!</p>
           </a>
