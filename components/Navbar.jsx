@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { useContext } from "react";
+import { UserContext } from "../lib/context";
 
 export default function Navbar() {
+  const { user, username } = useContext(UserContext);
   return (
     <main className='bg-none   md:pt-5 font-CircularMedium tracking-wide'>
       <section className='px-3    md:px-5  lg:max-w-7xl lg:mx-auto '>

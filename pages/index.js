@@ -13,20 +13,21 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href='https://utiliti.ai'>utiliti.ai </a>boilerplate
+          Welcome to <a href='https://utiliti.ai'>utiliti.ai </a>Firebase
+          boilerplate
         </h1>
 
         <p className={styles.description}>
           Get started by forking this repo
           <code className={styles.code}>
-            https://github.com/elonsdev/utility-boilerplate
+            https://github.com/elonsdev/utiliti-boilerplate
           </code>
         </p>
 
         <div className={styles.grid}>
           <a href='https://utiliti.ai/docs' className={styles.card}>
             <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about utility.ai features and API.</p>
+            <p>Find in-depth information about utiliti.ai features and API.</p>
           </a>
 
           <a href='https://utiliti.ai/learn' className={styles.card}>

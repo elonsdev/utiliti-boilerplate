@@ -1,11 +1,15 @@
 import Head from "next/head";
-import { createWallet } from "../lib/utility";
+import { createWallet } from "../lib/utiliti";
 
-export default function Identity() {
-  const testWallet = async () => {
-    const result = await createWallet("testwallet");
-    console.log(result);
-  };
+import { auth, googleAuthProvider, firestore } from "../lib/firebase";
+
+import { UserContext } from "../lib/context";
+
+import { useEffect, useState, useCallback, useContext } from "react";
+import debounce from "lodash.debounce";
+
+export default function Identity(props) {
+  const { user, username, address } = useContext(UserContext);
 
   return (
     <div>
@@ -16,28 +20,189 @@ export default function Identity() {
       </Head>
 
       <main className='motion-safe:animate-fadeIn min-h-[calc(100vh-325px)]'>
-        <section className='flex flex-col px-3 py-8 lg:h-[300px]  md:px-5  lg:max-w-7xl lg:mx-auto '>
+        <section className='flex flex-col px-3 py-8 lg:h-[250px]  md:px-5  lg:max-w-7xl lg:mx-auto '>
           <div className='text-center'>
             <h1 className='text-6xl font-FredokaOne mt-16 tracking-tight'>
               IDENTITY API
             </h1>
             <p className='text-zinc-400 text-sm mt-4 tracking-wide'>
-              Allow users to create a wallet easily and quickly with
-              utlity.ai&apos;s identity API...
+              Create a wallet for the user once they authenticate through
+              firebase.
             </p>
             <div className='mx-auto w-24 h-1 my-12 bg-gradient-to-r from-zinc-500 to-zinc-400 rounded-full'></div>
           </div>
         </section>
-        <section className='lg:max-w-[900px] mx-auto'>
-          <div
-            onClick={() => testWallet()}
-            className='hover:scale-105 font-extrabold transition-all cursor-pointer mt-8 w-[300px] text-center mx-auto bg-gradient-to-r from-blue-500 to-blue-700 py-3 px-5 text-2xl text-zinc-900 font-FredokaOne tracking-wider'
-          >
-            {" "}
-            CREATE WALLET
+        <section className='lg:max-w-[900px] mx-auto flex flex-col justify-center'>
+          <div className='flex justify-center'>
+            {user ? (
+              !username ? (
+                <UsernameForm />
+              ) : (
+                <>
+                  <div className='flex flex-col '>
+                    {username && (
+                      <>
+                        <div className='mt-8 w-[900px] flex justify-between'>
+                          <h4 className='mb-6 text-4xl'>Hello, {username}.</h4>
+                          <p className='text-2xl mt-2'>{address}</p>
+                        </div>
+                        <div>
+                          <p>You have 0 Testnet Utiliti tokens</p>
+                        </div>
+                      </>
+                    )}
+                    <div className='mt-24 self-center'>
+                      <SignOutButton />
+                    </div>
+                  </div>
+                </>
+              )
+            ) : (
+              <SignInButton />
+            )}
           </div>
         </section>
       </main>
     </div>
   );
+}
+
+// Sign in with Google button
+function SignInButton() {
+  const signInWithGoogle = async () => {
+    await auth.signInWithPopup(googleAuthProvider);
+  };
+
+  return (
+    <button
+      className='mt-24 font-extrabold font-FredokaOne bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 rounded-full text-lg px-5  py-3 cursor-pointer text-black hover:scale-105 transition-all'
+      onClick={signInWithGoogle}
+    >
+      Sign in with Google
+    </button>
+  );
+}
+
+// Sign out button
+function SignOutButton() {
+  return (
+    <button
+      className=' font-extrabold font-FredokaOne bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 rounded-full text-lg px-8  py-3 cursor-pointer text-black hover:scale-105 transition-all'
+      onClick={() => auth.signOut()}
+    >
+      Sign Out
+    </button>
+  );
+}
+
+// Username form
+function UsernameForm() {
+  const [formValue, setFormValue] = useState("");
+  const [isValid, setIsValid] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { user, username } = useContext(UserContext);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    const result = await createWallet(formValue);
+
+    // Create refs for both documents
+    const userDoc = firestore.doc(`users/${user.uid}`);
+    const usernameDoc = firestore.doc(`usernames/${formValue}`);
+
+    // Commit both docs together as a batch write.
+    const batch = firestore.batch();
+    batch.set(userDoc, {
+      username: formValue,
+      photoURL: user.photoURL,
+      displayName: user.displayName,
+      address: result.address,
+    });
+    batch.set(usernameDoc, { uid: user.uid });
+
+    await batch.commit();
+  };
+
+  const onChange = (e) => {
+    // Force form value typed in form to match correct format
+    const val = e.target.value.toLowerCase();
+    const re = /^(?=[a-zA-Z0-9._]{3,15}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
+
+    // Only set form value if length is < 3 OR it passes regex
+    if (val.length < 3) {
+      setFormValue(val);
+      setLoading(false);
+      setIsValid(false);
+    }
+
+    if (re.test(val)) {
+      setFormValue(val);
+      setLoading(true);
+      setIsValid(false);
+    }
+  };
+
+  //
+
+  useEffect(() => {
+    checkUsername(formValue);
+  }, [formValue]);
+
+  // Hit the database for username match after each debounced change
+  // useCallback is required for debounce to work
+  const checkUsername = useCallback(
+    debounce(async (username) => {
+      if (username.length >= 3) {
+        const ref = firestore.doc(`usernames/${username}`);
+        const { exists } = await ref.get();
+        console.log("Firestore read executed!");
+        setIsValid(!exists);
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  return (
+    !username && (
+      <section className='mt-16 flex flex-col justify-center text-center'>
+        <h3 className='text-zinc-400 mb-2'>Choose Your Username</h3>
+        <form onSubmit={onSubmit}>
+          <input
+            name='username'
+            placeholder='myname'
+            value={formValue}
+            onChange={onChange}
+            className='rounded text-center py-1 bg-zinc-700 ring-1 ring-black'
+          />
+          <UsernameMessage
+            username={formValue}
+            isValid={isValid}
+            loading={loading}
+          />
+          <button
+            type='submit'
+            className=' mt-6  font-extrabold font-FredokaOne bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 rounded-full text-lg px-8  py-3 cursor-pointer text-black hover:scale-105 transition-all'
+            disabled={!isValid}
+          >
+            Choose
+          </button>
+        </form>
+      </section>
+    )
+  );
+}
+
+function UsernameMessage({ username, isValid, loading }) {
+  if (loading) {
+    return <p className='mt-2'>Checking...</p>;
+  } else if (isValid) {
+    return <p className='text-green-500 mt-2'>{username} is available!</p>;
+  } else if (username && !isValid) {
+    return <p className='text-red-500 mt-2'>That username is taken!</p>;
+  } else {
+    return <p></p>;
+  }
 }
